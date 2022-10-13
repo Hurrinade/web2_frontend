@@ -2,6 +2,13 @@
   <div class="table-container">
     <h2>TABLE</h2>
     <div class="table" v-if="tableResults.length">
+      <div class="header">
+        <div class="table-item">
+          <p>{{ "Team name" }}</p>
+          <p style="padding-left: 25em">{{ "Goals" }}</p>
+          <p style="padding-left: 12em">{{ "Points" }}</p>
+        </div>
+      </div>
       <div
         v-for="element in tableResults"
         :key="element.clubId"
@@ -9,7 +16,8 @@
       >
         <div class="table-item" :key="element.clubId">
           <p>{{ element.clubName }}</p>
-          <p>{{ element.points }}</p>
+          <p style="padding-left: 25em">{{ element.goals }}</p>
+          <p style="padding-left: 12em">{{ element.points }}</p>
         </div>
       </div>
     </div>
@@ -38,45 +46,52 @@ export default defineComponent({
           clubId: globalData.tableData[key].clubId,
           clubName: globalData.tableData[key].clubName,
           points: 0,
+          goals: 0,
         });
       }
 
-      //   for (const key in results) {
-      //     console.log(results[key].firstTeamId);
-      //     if (results[key].firstTeamScore > results[key].secondTeamScore) {
-      //       tableResults.value[results[key].firstTeamId - 1].points += 3;
-      //     } else if (results[key].firstTeamScore < results[key].secondTeamScore) {
-      //       tableResults.value[results[key].secondTeamId - 1].points += 3;
-      //     } else {
-      //       tableResults.value[results[key].firstTeamId - 1].points += 1;
-      //       tableResults.value[results[key].secondTeamId - 1].points += 1;
-      //     }
-      //   }
-
       for (const key in globalData.resultsData) {
-        if (
-          globalData.resultsData[key].firstTeamScore >
-          globalData.resultsData[key].secondTeamScore
-        ) {
-          tableResults.value[
-            globalData.resultsData[key].firstTeamId - 1
-          ].points += 3;
-        } else if (
-          globalData.resultsData[key].firstTeamScore <
-          globalData.resultsData[key].secondTeamScore
-        ) {
-          tableResults.value[
-            globalData.resultsData[key].secondTeamId - 1
-          ].points += 3;
+        let firstTeamGoals = globalData.resultsData[key].firstTeamScore;
+        let secondTeamGoals = globalData.resultsData[key].secondTeamScore;
+        let firstTeamId = globalData.resultsData[key].firstTeamId;
+        let secondTeamId = globalData.resultsData[key].secondTeamId;
+
+        if (firstTeamGoals > secondTeamGoals) {
+          //points
+          tableResults.value[firstTeamId - 1].points += 3;
+
+          //goals
+          tableResults.value[firstTeamId - 1].goals += firstTeamGoals;
+          tableResults.value[secondTeamId - 1].goals += secondTeamGoals;
+        } else if (firstTeamGoals < secondTeamGoals) {
+          //points
+          tableResults.value[secondTeamId - 1].points += 3;
+
+          //goals
+          tableResults.value[firstTeamId - 1].goals += firstTeamGoals;
+          tableResults.value[secondTeamId - 1].goals += secondTeamGoals;
         } else {
-          tableResults.value[
-            globalData.resultsData[key].firstTeamId - 1
-          ].points += 1;
-          tableResults.value[
-            globalData.resultsData[key].secondTeamId - 1
-          ].points += 1;
+          //points
+          tableResults.value[firstTeamId - 1].points += 1;
+          tableResults.value[secondTeamId - 1].points += 1;
+
+          //goals
+          tableResults.value[firstTeamId - 1].goals += firstTeamGoals;
+          tableResults.value[secondTeamId - 1].goals += secondTeamGoals;
         }
       }
+
+      tableResults.value.sort((p1: any, p2: any) =>
+        p1.points < p2.points
+          ? 1
+          : p1.points > p2.points
+          ? -1
+          : p1.goals < p2.goals
+          ? 1
+          : p1.goals > p2.goals
+          ? -1
+          : 0
+      );
     };
 
     calculateScore(globals);
@@ -99,18 +114,25 @@ export default defineComponent({
   flex-direction: column;
 }
 
-.table-row {
+.table-row,
+.header {
   padding: 1em;
   margin: 1em;
-  width: 50em;
+  width: 52em;
   display: flex;
   justify-content: start;
   border-bottom: 3px #3e5a77 solid;
 }
 
 .table-item {
-  width: 49em;
+  width: 50em;
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
+}
+
+.table-item > p {
+  width: 15em;
+  display: flex;
+  justify-content: start;
 }
 </style>

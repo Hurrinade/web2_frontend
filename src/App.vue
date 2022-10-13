@@ -4,10 +4,17 @@
       <a class="nav-button" @click="changeTab('table')">Table</a>
       <a class="nav-button" @click="changeTab('fixtures')">Fixtures</a>
       <a class="nav-button" @click="changeTab('results')">Results</a>
+      <a
+        class="nav-button"
+        style="margin-left: 40em"
+        @click="changeTab('login')"
+        >Log in</a
+      >
     </div>
     <TableView v-if="tab === 'table'" />
     <FixturesView v-if="tab === 'fixtures'" />
     <ResultsView v-if="tab === 'results'" />
+    <LoginPage v-if="tab === 'login'" />
   </div>
 </template>
 
@@ -16,6 +23,7 @@ import { defineComponent, ref } from "vue";
 import FixturesView from "./components/FixturesView.vue";
 import ResultsView from "./components/ResultsView.vue";
 import TableView from "./components/TableView.vue";
+import LoginPage from "./components/LoginPage.vue";
 import { useGlobalsStore } from "./stores/globals";
 
 export default defineComponent({
@@ -24,6 +32,7 @@ export default defineComponent({
     FixturesView,
     ResultsView,
     TableView,
+    LoginPage,
   },
   setup() {
     const tab = ref("table");
@@ -36,11 +45,14 @@ export default defineComponent({
 
     const fetchData = async () => {
       const res = await fetch("https://localhost:4080/data");
+      const resComments = await fetch("https://localhost:4080/data/comments");
       const data = await res.json();
-      console.log(data);
+      const commentsData = await resComments.json();
+
       globals.tableData = data.table;
       globals.fixturesData = data.fixtures;
       globals.resultsData = data.results;
+      globals.commentsData = commentsData;
     };
 
     fetchData();
@@ -81,7 +93,7 @@ html {
 .sport {
   background-color: #2c3e50;
   border-radius: 1em;
-  height: 50em;
+  height: 55em;
   width: 80em;
 }
 
@@ -107,6 +119,7 @@ html {
 }
 
 .nav-button:hover {
+  cursor: pointer;
   background-color: #445f79;
   text-decoration: none;
 }

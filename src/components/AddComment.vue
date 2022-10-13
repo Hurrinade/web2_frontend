@@ -1,0 +1,117 @@
+<template>
+  <div class="comments-container">
+    <div class="header">
+      <h2>Add comment</h2>
+    </div>
+    <form @submit.prevent="submit" class="new-comment-form">
+      <label for="email">User email</label>
+      <input
+        class="field"
+        id="email"
+        type="text"
+        disabled
+        placeholder="...user email"
+      />
+      <label for="email">Comment</label>
+      <textarea id="email" type="text" maxlength="200" />
+      <div class="buttons">
+        <input value="Submit" type="submit" class="form-button" />
+        <input value="Cancel" class="form-button" @click="cancel" />
+      </div>
+    </form>
+  </div>
+</template>
+
+<script lang="ts">
+import { defineComponent, ref } from "vue";
+import { useGlobalsStore } from "../stores/globals";
+export default defineComponent({
+  props: {
+    resultid: {
+      type: String,
+      default: null,
+    },
+  },
+  emits: ["cancelnewcomment"],
+  setup(props: any, ctx: any) {
+    const globals = useGlobalsStore();
+    const comments: any = ref(globals.commentsData);
+
+    console.log(props.resultid);
+
+    const submit = () => {
+      console.log("on submit");
+    };
+
+    const cancel = () => {
+      ctx.emit("cancelnewcomment");
+    };
+
+    return { comments, submit, cancel };
+  },
+});
+</script>
+
+<style scoped>
+.header {
+  display: flex;
+  justify-content: space-around;
+}
+
+.comments-container {
+  padding: 1em;
+  border-radius: 1em;
+  background-color: #4f6f91;
+  width: 23em;
+  height: 35em;
+  overflow-y: scroll;
+}
+
+.new-comment-form {
+  margin: 2em;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+.field {
+  color: white;
+  padding: 1em;
+  margin: 2em 0em 3em 0em;
+  width: 20em;
+  background-color: #3e5a77;
+  display: flex;
+  justify-content: start;
+  border: none;
+}
+
+textarea {
+  margin: 1em;
+  background-color: rgb(229, 229, 229);
+  border: none;
+  outline: none;
+  width: 20em;
+  height: 15em;
+}
+
+.buttons {
+  display: flex;
+}
+
+.form-button {
+  text-align: center;
+  cursor: pointer;
+  border-radius: 1em;
+  width: 10em;
+  margin: 3em 0.5em 0em 0.5em;
+  height: 2em;
+  border: none;
+  color: white;
+  background-color: #3e5a77;
+}
+
+.form-button:hover {
+  background-color: #6894c3;
+}
+</style>
