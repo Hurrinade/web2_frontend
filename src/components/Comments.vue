@@ -59,15 +59,15 @@ export default defineComponent({
     const comments: any = ref(globals.commentsData);
     const addNewComment = ref(false);
 
-    const deleteComment = (comment) => {
+    const deleteComment = (comment: any) => {
       console.log("delete", comment);
     };
 
-    const editComment = (comment) => {
+    const editComment = (comment: any) => {
       console.log("edit", comment);
     };
 
-    const addComment = (resultId) => {
+    const addComment = (resultId: any) => {
       console.log("add", resultId);
       addNewComment.value = true;
     };
