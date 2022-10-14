@@ -1,80 +1,38 @@
 <template>
-  <div class="login-container">
-    <h2>Login</h2>
-    <form @submit.prevent="submit" class="login">
-      <label for="email">Email: </label>
-      <input id="email" type="email" v-model="email" class="field" />
-      <label for="password">Password: </label>
-      <input id="password" type="password" v-model="password" class="field" />
-      <input value="Submit" type="submit" class="form-button" />
-    </form>
-  </div>
+  <div class="login-container" @click="login">Log In</div>
 </template>
 
 <script lang="ts">
 import { defineComponent, ref, watch } from "vue";
+import { useAuth0 } from "@auth0/auth0-vue";
+import { useGlobalsStore } from "../stores/globals";
 export default defineComponent({
   setup() {
-    const email = ref("");
-    const password = ref("");
+    const { loginWithRedirect } = useAuth0();
 
-    const submit = async () => {
-      const data = {
-        email: email.value,
-        password: password.value,
-      };
-
-      console.log(JSON.stringify(data));
-
-      const response = await fetch("https://localhost:4080/authenticate", {
-        method: "POST",
-        mode: "cors",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      });
+    const login = () => {
+      loginWithRedirect();
     };
 
-    return { email, password, submit };
+    return { login };
   },
 });
 </script>
 
 <style scoped>
 .login-container {
-  margin-top: 2em;
-}
-
-.login {
-  margin: 5em;
   display: flex;
   justify-content: center;
   align-items: center;
-  flex-direction: column;
-}
-
-.field {
-  color: white;
-  padding: 1em;
-  margin: 2em 0em 4em 0em;
-  width: 50em;
-  background-color: #3e5a77;
-  display: flex;
-  justify-content: start;
-  border: none;
-}
-
-.form-button {
-  border-radius: 1em;
-  color: white;
-  height: 3em;
   width: 10em;
-  background-color: #3e5a77;
-  border: none;
+  height: 5em;
+  font-weight: 600;
+  letter-spacing: 0.15em;
 }
 
-.field:focus {
-  outline: none;
+.login-container:hover {
+  cursor: pointer;
+  background-color: #445f79;
+  text-decoration: none;
 }
 </style>

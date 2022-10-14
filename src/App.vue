@@ -4,17 +4,11 @@
       <a class="nav-button" @click="changeTab('table')">Table</a>
       <a class="nav-button" @click="changeTab('fixtures')">Fixtures</a>
       <a class="nav-button" @click="changeTab('results')">Results</a>
-      <a
-        class="nav-button"
-        style="margin-left: 40em"
-        @click="changeTab('login')"
-        >Log in</a
-      >
+      <a style="margin-left: 40em"><LoginPage /></a>
     </div>
     <TableView v-if="tab === 'table'" />
     <FixturesView v-if="tab === 'fixtures'" />
     <ResultsView v-if="tab === 'results'" />
-    <LoginPage v-if="tab === 'login'" />
   </div>
 </template>
 
@@ -34,7 +28,7 @@ export default defineComponent({
     TableView,
     LoginPage,
   },
-  setup() {
+  setup(props: any, ctx: any) {
     const tab = ref("table");
 
     const globals = useGlobalsStore();
@@ -44,8 +38,15 @@ export default defineComponent({
     };
 
     const fetchData = async () => {
-      const res = await fetch("https://localhost:4080/data");
-      const resComments = await fetch("https://localhost:4080/data/comments");
+      const res = await fetch(`${globals.localUrl}/data`);
+
+      console.log(ctx);
+      // const accessToken = await auth.getTokenSilently();
+      const resComments = await fetch(`${globals.localUrl}/data/comments`, {
+        headers: {
+          // Authorization: `Bearer ${accessToken}`,
+        },
+      });
       const data = await res.json();
       const commentsData = await resComments.json();
 
