@@ -4,7 +4,8 @@
       <a class="nav-button" @click="changeTab('table')">Table</a>
       <a class="nav-button" @click="changeTab('fixtures')">Fixtures</a>
       <a class="nav-button" @click="changeTab('results')">Results</a>
-      <a style="margin-left: 40em"><LoginPage /></a>
+      <a v-if="!isAuthenticated" style="margin-left: 40em"><LoginPage /></a>
+      <a v-if="isAuthenticated" style="margin-left: 40em"><LogoutPage /></a>
     </div>
     <TableView v-if="tab === 'table'" />
     <FixturesView v-if="tab === 'fixtures'" />
@@ -13,12 +14,14 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from "vue";
+import { defineComponent, ref, watch } from "vue";
 import FixturesView from "./components/FixturesView.vue";
 import ResultsView from "./components/ResultsView.vue";
 import TableView from "./components/TableView.vue";
 import LoginPage from "./components/LoginPage.vue";
+import LogoutPage from "./components/LogoutPage.vue";
 import { useGlobalsStore } from "./stores/globals";
+import { useAuth0 } from "@auth0/auth0-vue";
 
 export default defineComponent({
   name: "App",
@@ -27,11 +30,14 @@ export default defineComponent({
     ResultsView,
     TableView,
     LoginPage,
+    LogoutPage,
   },
+
   setup(props: any, ctx: any) {
     const tab = ref("table");
 
     const globals = useGlobalsStore();
+    const { getAccessTokenSilently, error, user, isAuthenticated } = useAuth0();
 
     const changeTab = (newTab: string) => {
       tab.value = newTab;
@@ -39,21 +45,38 @@ export default defineComponent({
 
     const fetchData = async () => {
       const res = await fetch(`${globals.localUrl}/data`);
-
-      console.log(ctx);
-      // const accessToken = await auth.getTokenSilently();
-      const resComments = await fetch(`${globals.localUrl}/data/comments`, {
-        headers: {
-          // Authorization: `Bearer ${accessToken}`,
-        },
-      });
       const data = await res.json();
-      const commentsData = await resComments.json();
-
       globals.tableData = data.table;
       globals.fixturesData = data.fixtures;
       globals.resultsData = data.results;
-      globals.commentsData = commentsData;
+    };
+
+    watch(
+      () => isAuthenticated,
+      (val) => {
+        if (isAuthenticated) {
+          fetchComments();
+        }
+      },
+      { deep: true }
+    );
+
+    const fetchComments = async () => {
+      try {
+        const accessToken = await getAccessTokenSilently();
+        const resComments = await fetch(`${globals.localUrl}/data/comments`, {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        });
+
+        if (resComments.ok) {
+          const commentsData = await resComments.json();
+          globals.commentsData = commentsData;
+        }
+      } catch (e) {
+        console.log(error);
+      }
     };
 
     fetchData();
@@ -61,6 +84,7 @@ export default defineComponent({
     return {
       tab,
       changeTab,
+      isAuthenticated,
     };
   },
 });

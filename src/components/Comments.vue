@@ -3,9 +3,15 @@
     <AddComment
       v-if="addNewComment"
       :resultid="resultid"
-      @cancelnewcomment="addNewComment = false"
+      @closenewcomment="addNewComment = false"
     />
-    <div v-if="!addNewComment" class="comments-container">
+    <EditComment
+      v-if="toogleEditComment"
+      :resultid="resultid"
+      :commentid="editCommentId"
+      @closeedit="toogleEditComment = false"
+    />
+    <div v-if="!addNewComment && !toogleEditComment" class="comments-container">
       <div class="header">
         <h2>Comments</h2>
         <button class="add" @click="addComment(resultid)">+</button>
@@ -41,12 +47,16 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from "vue";
+import { defineComponent, ref, watch } from "vue";
 import { useGlobalsStore } from "../stores/globals";
+import { useAuth0 } from "@auth0/auth0-vue";
 import AddComment from "./AddComment.vue";
+import EditComment from "./EditComment.vue";
+
 export default defineComponent({
   components: {
     AddComment,
+    EditComment,
   },
   props: {
     resultid: {
@@ -58,21 +68,66 @@ export default defineComponent({
     const globals = useGlobalsStore();
     const comments: any = ref(globals.commentsData);
     const addNewComment = ref(false);
+    const toogleEditComment = ref(false);
+    const editCommentId = ref("");
+    const { getAccessTokenSilently, isAuthenticated } = useAuth0();
 
-    const deleteComment = (comment: any) => {
-      console.log("delete", comment);
+    watch(
+      () => globals.commentsData,
+      (val) => {
+        comments.value = val;
+        editCommentId.value = "";
+      },
+      { deep: true }
+    );
+
+    const deleteComment = async (comment: any) => {
+      if (isAuthenticated) {
+        const accessToken = await getAccessTokenSilently();
+        const resComments = await fetch(
+          `${globals.localUrl}/data/comments?` +
+            new URLSearchParams({
+              id: comment.commentId,
+            }),
+          {
+            method: "DELETE",
+            mode: "cors",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${accessToken}`,
+            },
+          }
+        );
+
+        if (resComments.ok) {
+          const commentsData = await resComments.json();
+          globals.commentsData = commentsData;
+        } else {
+          console.log(resComments.status);
+        }
+      } else {
+        alert("Login is needed");
+      }
     };
 
     const editComment = (comment: any) => {
-      console.log("edit", comment);
+      toogleEditComment.value = true;
+      editCommentId.value = comment.commentId;
     };
 
     const addComment = (resultId: any) => {
-      console.log("add", resultId);
       addNewComment.value = true;
     };
 
-    return { comments, deleteComment, editComment, addComment, addNewComment };
+    return {
+      comments,
+      deleteComment,
+      editComment,
+      addComment,
+      addNewComment,
+      toogleEditComment,
+      editCommentId,
+    };
   },
 });
 </script>

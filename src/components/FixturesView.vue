@@ -26,6 +26,15 @@ export default defineComponent({
     const globals = useGlobalsStore();
     const results: any = ref([]);
 
+    watch(
+      () => globals,
+      (val) => {
+        results.value = [];
+        getTeamsById(val);
+      },
+      { deep: true }
+    );
+
     const getTeamsById = (globalData: any) => {
       for (const key in globalData.fixturesData) {
         results.value.push({

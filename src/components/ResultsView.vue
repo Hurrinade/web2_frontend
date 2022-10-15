@@ -15,6 +15,7 @@
             <p>{{ element.secondTeamGoals }}</p>
             <p>{{ element.secondTeamName }}</p>
             <button
+              v-if="isAuthenticated"
               class="comments-button"
               :class="{
                 selected: isComments && element.resultId == selectedResultId,
@@ -26,7 +27,10 @@
           </div>
         </div>
       </div>
-      <Comments :resultid="selectedResultId" v-if="isComments" />
+      <Comments
+        v-if="isComments && isAuthenticated"
+        :resultid="selectedResultId"
+      />
     </div>
   </div>
 </template>
@@ -34,6 +38,7 @@
 <script lang="ts">
 import { defineComponent, ref, watch } from "vue";
 import { useGlobalsStore } from "../stores/globals";
+import { useAuth0 } from "@auth0/auth0-vue";
 import Comments from "./Comments.vue";
 
 export default defineComponent({
@@ -41,10 +46,20 @@ export default defineComponent({
     Comments,
   },
   setup() {
+    const { error, isAuthenticated } = useAuth0();
     const globals = useGlobalsStore();
     const results: any = ref([]);
     const selectedResultId: any = ref(null);
     const isComments: any = ref(false);
+
+    watch(
+      () => globals,
+      (val) => {
+        results.value = [];
+        getTeamsById(val);
+      },
+      { deep: true }
+    );
 
     const getTeamsById = (globalData: any) => {
       for (const key in globalData.resultsData) {
@@ -76,7 +91,13 @@ export default defineComponent({
     };
 
     getTeamsById(globals);
-    return { results, toggleComments, isComments, selectedResultId };
+    return {
+      results,
+      toggleComments,
+      isComments,
+      selectedResultId,
+      isAuthenticated,
+    };
   },
 });
 </script>

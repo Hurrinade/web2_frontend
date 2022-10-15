@@ -1,20 +1,23 @@
 <template>
-  <div class="login-container" @click="login">Log In</div>
+  <div class="login-container" @click="logoutFromAccount">Log out</div>
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, watch } from "vue";
+import { defineComponent } from "vue";
 import { useAuth0 } from "@auth0/auth0-vue";
+import { useGlobalsStore } from "../stores/globals";
 
 export default defineComponent({
   setup() {
-    const { loginWithRedirect, isAuthenticated } = useAuth0();
+    const { logout } = useAuth0();
+    const globals = useGlobalsStore();
 
-    const login = async () => {
-      loginWithRedirect();
+    const logoutFromAccount = () => {
+      globals.commentsData = [];
+      logout({ returnTo: window.location.origin });
     };
 
-    return { login };
+    return { logoutFromAccount };
   },
 });
 </script>

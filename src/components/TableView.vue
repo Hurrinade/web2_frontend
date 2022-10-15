@@ -35,6 +35,7 @@ export default defineComponent({
     watch(
       () => globals,
       (val) => {
+        tableResults.value = [];
         calculateScore(val);
       },
       { deep: true }

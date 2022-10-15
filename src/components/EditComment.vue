@@ -33,8 +33,12 @@ export default defineComponent({
       type: String,
       default: null,
     },
+    commentid: {
+      type: String,
+      default: null,
+    },
   },
-  emits: ["closenewcomment"],
+  emits: ["closeedit"],
   setup(props: any, ctx: any) {
     const { getAccessTokenSilently, user, isAuthenticated } = useAuth0();
     const globals = useGlobalsStore();
@@ -43,7 +47,7 @@ export default defineComponent({
 
     const submit = async () => {
       if (isAuthenticated) {
-        const newComment = {
+        const editComment = {
           resultId: props.resultid,
           email: user.value.email,
           date: dayjs().format("DD-MM-YYYY"),
@@ -51,28 +55,36 @@ export default defineComponent({
         };
 
         const accessToken = await getAccessTokenSilently();
-        const resComments = await fetch(`${globals.localUrl}/data/comments`, {
-          method: "POST",
-          mode: "cors",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${accessToken}`,
-          },
-          body: JSON.stringify(newComment),
-        });
+        const resComments = await fetch(
+          `${globals.localUrl}/data/comments?` +
+            new URLSearchParams({
+              id: props.commentid,
+            }),
+          {
+            method: "PUT",
+            mode: "cors",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${accessToken}`,
+            },
+            body: JSON.stringify(editComment),
+          }
+        );
 
         if (resComments.ok) {
           const commentsData = await resComments.json();
           globals.commentsData = commentsData;
-          ctx.emit("closenewcomment");
+          ctx.emit("closeedit");
         } else {
           console.log(resComments.status);
         }
+      } else {
+        alert("Login is needed");
       }
     };
 
     const cancel = () => {
-      ctx.emit("closenewcomment");
+      ctx.emit("closeedit");
     };
 
     return { comments, submit, cancel, user, commentText };
