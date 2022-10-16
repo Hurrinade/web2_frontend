@@ -67,7 +67,7 @@ export default defineComponent({
     });
 
     const submit = async () => {
-      if (isAuthenticated) {
+      if (isAuthenticated.value) {
         let team1Id = null;
         let team2Id = null;
         for (const team in globals.tableData) {

@@ -58,7 +58,7 @@ export default defineComponent({
     watch(
       () => isAuthenticated,
       (val) => {
-        if (isAuthenticated) {
+        if (isAuthenticated.value) {
           fetchRole();
           fetchComments();
         }

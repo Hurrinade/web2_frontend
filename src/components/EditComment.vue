@@ -52,7 +52,7 @@ export default defineComponent({
     });
 
     const submit = async () => {
-      if (isAuthenticated) {
+      if (isAuthenticated.value) {
         const editComment = {
           commentId: props.commentid,
           resultId: props.resultid,

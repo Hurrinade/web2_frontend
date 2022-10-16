@@ -3,8 +3,8 @@ import { defineStore } from 'pinia'
 export const useGlobalsStore = defineStore('globals', {
     state: () => {
         return {
-            localUrl: process.env.PRODUCTION_URL != null ? process.env.PRODUCTION_URL : "https://localhost:4080",
-            deployUrl: "https://web2-labs.onrender.com",
+            localUrl: "https://web2-labs.onrender.com",
+            deployUrl: "https://localhost:4080",
             commentsData: [],
             tableData: {},
             fixturesData: {},

@@ -42,7 +42,7 @@ export default defineComponent({
     const commentText = ref("");
 
     const submit = async () => {
-      if (isAuthenticated) {
+      if (isAuthenticated.value) {
         const newComment = {
           resultId: props.resultid,
           email: user.value.email,

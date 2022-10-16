@@ -61,7 +61,7 @@ export default defineComponent({
     });
 
     const submit = async () => {
-      if (isAuthenticated) {
+      if (isAuthenticated.value) {
         let team1Id = null;
         let team2Id = null;
         for (const team in globals.tableData) {
@@ -79,7 +79,7 @@ export default defineComponent({
           firstTeamScore: teamOneGoals.value,
           secondTeamScore: teamTwoGoals.value,
         };
-        console.log(newResult);
+
         if (team1Id != team2Id) {
           const accessToken = await getAccessTokenSilently();
           const resResults = await fetch(`${globals.localUrl}/data/results`, {
