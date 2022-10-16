@@ -1,12 +1,12 @@
 <template>
   <div>
     <AddComment
-      v-if="addNewComment"
+      v-if="addNewComment && globals.userRole === 'USER'"
       :resultid="resultid"
       @closenewcomment="addNewComment = false"
     />
     <EditComment
-      v-if="toogleEditComment"
+      v-if="toogleEditComment && globals.userRole === 'USER'"
       :resultid="resultid"
       :commentid="editCommentId"
       @closeedit="toogleEditComment = false"
@@ -14,7 +14,13 @@
     <div v-if="!addNewComment && !toogleEditComment" class="comments-container">
       <div class="header">
         <h2>Comments</h2>
-        <button class="add" @click="addComment(resultid)">+</button>
+        <button
+          class="add"
+          v-if="globals.userRole === 'USER'"
+          @click="addComment(resultid)"
+        >
+          +
+        </button>
       </div>
 
       <div
@@ -35,7 +41,13 @@
             </div>
           </div>
           <div class="comment-actions">
-            <button class="edit" @click="editComment(comment)">Edit</button>
+            <button
+              class="edit"
+              v-if="globals.userRole === 'USER'"
+              @click="editComment(comment)"
+            >
+              Edit
+            </button>
             <button class="delete" @click="deleteComment(comment)">
               Delete
             </button>
@@ -84,8 +96,13 @@ export default defineComponent({
     const deleteComment = async (comment: any) => {
       if (isAuthenticated) {
         const accessToken = await getAccessTokenSilently();
+        const url =
+          globals.userRole === "USER"
+            ? `${globals.localUrl}/data/comments?`
+            : `${globals.localUrl}/data/comments/any?`;
+
         const resComments = await fetch(
-          `${globals.localUrl}/data/comments?` +
+          url +
             new URLSearchParams({
               id: comment.commentId,
             }),
@@ -127,6 +144,7 @@ export default defineComponent({
       addNewComment,
       toogleEditComment,
       editCommentId,
+      globals,
     };
   },
 });

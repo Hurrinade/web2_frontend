@@ -4,8 +4,10 @@
       <a class="nav-button" @click="changeTab('table')">Table</a>
       <a class="nav-button" @click="changeTab('fixtures')">Fixtures</a>
       <a class="nav-button" @click="changeTab('results')">Results</a>
+
       <a v-if="!isAuthenticated" style="margin-left: 40em"><LoginPage /></a>
-      <a v-if="isAuthenticated" style="margin-left: 40em"><LogoutPage /></a>
+      <a v-if="isAuthenticated" style="margin-left: 35em"><LogoutPage /></a>
+      <UserInfo v-if="isAuthenticated" style="" />
     </div>
     <TableView v-if="tab === 'table'" />
     <FixturesView v-if="tab === 'fixtures'" />
@@ -20,6 +22,7 @@ import ResultsView from "./components/ResultsView.vue";
 import TableView from "./components/TableView.vue";
 import LoginPage from "./components/LoginPage.vue";
 import LogoutPage from "./components/LogoutPage.vue";
+import UserInfo from "./components/UserInfo.vue";
 import { useGlobalsStore } from "./stores/globals";
 import { useAuth0 } from "@auth0/auth0-vue";
 
@@ -28,6 +31,7 @@ export default defineComponent({
   components: {
     FixturesView,
     ResultsView,
+    UserInfo,
     TableView,
     LoginPage,
     LogoutPage,
@@ -55,11 +59,40 @@ export default defineComponent({
       () => isAuthenticated,
       (val) => {
         if (isAuthenticated) {
+          fetchRole();
           fetchComments();
         }
       },
       { deep: true }
     );
+
+    const fetchRole = async () => {
+      try {
+        const accessToken = await getAccessTokenSilently();
+        const [resRoleUser, resRoleAdmin] = await Promise.all([
+          fetch(`${globals.localUrl}/data/role/user`, {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          }),
+          fetch(`${globals.localUrl}/data/role/admin`, {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          }),
+        ]);
+
+        if (resRoleUser.ok) {
+          const role = await resRoleUser.json();
+          globals.userRole = role;
+        } else if (resRoleAdmin.ok) {
+          const role = await resRoleAdmin.json();
+          globals.userRole = role;
+        }
+      } catch (e) {
+        console.log(error);
+      }
+    };
 
     const fetchComments = async () => {
       try {
@@ -119,7 +152,7 @@ html {
   background-color: #2c3e50;
   border-radius: 1em;
   height: 55em;
-  width: 80em;
+  width: 85em;
 }
 
 .navigation {
@@ -147,5 +180,10 @@ html {
   cursor: pointer;
   background-color: #445f79;
   text-decoration: none;
+}
+
+.error {
+  background-color: #445f79;
+  color: rgb(255, 0, 0);
 }
 </style>

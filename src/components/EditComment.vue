@@ -1,7 +1,7 @@
 <template>
   <div class="comments-container">
     <div class="header">
-      <h2>Add comment</h2>
+      <h2>Edit comment</h2>
     </div>
     <form @submit.prevent="submit" class="new-comment-form">
       <label for="email">User email</label>
@@ -19,6 +19,7 @@
         <input value="Cancel" class="form-button" @click="cancel" />
       </div>
     </form>
+    <div v-if="error.isError" class="error">{{ error.msg }}</div>
   </div>
 </template>
 
@@ -45,9 +46,15 @@ export default defineComponent({
     const comments: any = ref(globals.commentsData);
     const commentText = ref("");
 
+    const error = ref({
+      msg: "",
+      isError: false,
+    });
+
     const submit = async () => {
       if (isAuthenticated) {
         const editComment = {
+          commentId: props.commentid,
           resultId: props.resultid,
           email: user.value.email,
           date: dayjs().format("DD-MM-YYYY"),
@@ -55,28 +62,27 @@ export default defineComponent({
         };
 
         const accessToken = await getAccessTokenSilently();
-        const resComments = await fetch(
-          `${globals.localUrl}/data/comments?` +
-            new URLSearchParams({
-              id: props.commentid,
-            }),
-          {
-            method: "PUT",
-            mode: "cors",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${accessToken}`,
-            },
-            body: JSON.stringify(editComment),
-          }
-        );
+        const resComments = await fetch(`${globals.localUrl}/data/comments`, {
+          method: "PUT",
+          mode: "cors",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+          },
+          body: JSON.stringify(editComment),
+        });
 
         if (resComments.ok) {
           const commentsData = await resComments.json();
           globals.commentsData = commentsData;
+
+          error.value.msg = "";
+          error.value.isError = false;
           ctx.emit("closeedit");
         } else {
-          console.log(resComments.status);
+          const commentsData = await resComments.json();
+          error.value.msg = String(commentsData.error);
+          error.value.isError = true;
         }
       } else {
         alert("Login is needed");
@@ -87,7 +93,7 @@ export default defineComponent({
       ctx.emit("closeedit");
     };
 
-    return { comments, submit, cancel, user, commentText };
+    return { comments, submit, cancel, user, commentText, error };
   },
 });
 </script>
