@@ -1,9 +1,9 @@
 <template>
   <div class="fixtures-container">
     <h2>FIXTURES</h2>
-    <div class="table" v-if="results.length">
+    <div class="table" v-if="fixtures.length">
       <div
-        v-for="element in results"
+        v-for="element in fixtures"
         :key="element.fixtureId"
         class="table-row"
       >
@@ -21,15 +21,18 @@
 <script lang="ts">
 import { defineComponent, ref, watch } from "vue";
 import { useGlobalsStore } from "../stores/globals";
+
+import type { Ref } from "vue";
+import { Fixture } from "../models/data_models";
 export default defineComponent({
   setup() {
     const globals = useGlobalsStore();
-    const results: any = ref([]);
+    const fixtures: Ref<Fixture[]> = ref([]);
 
     watch(
       () => globals,
       (val) => {
-        results.value = [];
+        fixtures.value = [];
         getTeamsById(val);
       },
       { deep: true }
@@ -37,7 +40,7 @@ export default defineComponent({
 
     const getTeamsById = (globalData: any) => {
       for (const key in globalData.fixturesData) {
-        results.value.push({
+        fixtures.value.push({
           clubId: globalData.fixturesData[key].fixtureId,
           firstTeamName:
             globalData.tableData[globalData.fixturesData[key].firstTeamId - 1]
@@ -51,7 +54,7 @@ export default defineComponent({
     };
 
     getTeamsById(globals);
-    return { results };
+    return { fixtures };
   },
 });
 </script>

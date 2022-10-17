@@ -41,19 +41,21 @@
 import { defineComponent, ref, computed } from "vue";
 import { useGlobalsStore } from "../stores/globals";
 import { useAuth0 } from "@auth0/auth0-vue";
+import type { Ref } from "vue";
+import { Result } from "../models/data_models";
 import dayjs from "dayjs";
 export default defineComponent({
   emits: ["closeadd"],
   setup(props: any, ctx: any) {
     const { getAccessTokenSilently, user, isAuthenticated } = useAuth0();
     const globals: any = useGlobalsStore();
-    const comments: any = ref(globals.commentsData);
-    const commentText = ref("");
+    const comments: Ref<Result[]> = ref(globals.commentsData);
+    const commentText: Ref<string> = ref("");
 
-    const selectedTeam1 = ref(null);
-    const selectedTeam2 = ref(null);
-    const teamOneGoals = ref(null);
-    const teamTwoGoals = ref(null);
+    const selectedTeam1: Ref<string | null> = ref(null);
+    const selectedTeam2: Ref<string | null> = ref(null);
+    const teamOneGoals: Ref<number | null> = ref(null);
+    const teamTwoGoals: Ref<number | null> = ref(null);
 
     const error = ref({
       msg: "",

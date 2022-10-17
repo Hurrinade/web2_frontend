@@ -85,6 +85,9 @@ import Comments from "./Comments.vue";
 import EditResult from "./EditResult.vue";
 import AddResult from "./AddResult.vue";
 
+import { Result } from "../models/data_models";
+import type { Ref } from "vue";
+
 export default defineComponent({
   components: {
     Comments,
@@ -92,14 +95,14 @@ export default defineComponent({
     AddResult,
   },
   setup() {
-    const { error, isAuthenticated, getAccessTokenSilently } = useAuth0();
+    const { error, isAuthenticated } = useAuth0();
     const globals = useGlobalsStore();
-    const results: any = ref([]);
-    const selectedResultId: any = ref(null);
-    const isComments: any = ref(false);
-    const isEditResult: any = ref(false);
-    const isAddResult: any = ref(false);
-    const resultToEdit: any = ref(null);
+    const results: Ref<Result[]> = ref([]);
+    const selectedResultId: Ref<number | null> = ref(null);
+    const isComments: Ref<boolean> = ref(false);
+    const isEditResult: Ref<boolean> = ref(false);
+    const isAddResult: Ref<boolean> = ref(false);
+    const resultToEdit: Ref<Result | null> = ref(null);
 
     watch(
       () => globals,
@@ -126,7 +129,7 @@ export default defineComponent({
       }
     };
 
-    const toggleComments = (resultId: any) => {
+    const toggleComments = (resultId: number) => {
       isAddResult.value = false;
       isEditResult.value = false;
       resultToEdit.value = null;
@@ -142,7 +145,7 @@ export default defineComponent({
       }
     };
 
-    const editResult = async (result: any) => {
+    const editResult = async (result: Result) => {
       isAddResult.value = false;
       isComments.value = false;
       selectedResultId.value = null;

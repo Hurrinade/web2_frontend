@@ -26,11 +26,14 @@
 import { defineComponent, ref } from "vue";
 import { useGlobalsStore } from "../stores/globals";
 import { useAuth0 } from "@auth0/auth0-vue";
+
+import type { Ref } from "vue";
+import { Result } from "../models/data_models";
 import dayjs from "dayjs";
 export default defineComponent({
   props: {
     resultid: {
-      type: String,
+      type: Number,
       default: null,
     },
   },
@@ -38,8 +41,8 @@ export default defineComponent({
   setup(props: any, ctx: any) {
     const { getAccessTokenSilently, user, isAuthenticated } = useAuth0();
     const globals = useGlobalsStore();
-    const comments: any = ref(globals.commentsData);
-    const commentText = ref("");
+    const comments: Ref<Result[]> = ref(globals.commentsData);
+    const commentText: Ref<string> = ref("");
 
     const submit = async () => {
       if (isAuthenticated.value) {

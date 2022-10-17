@@ -27,10 +27,13 @@
 <script lang="ts">
 import { defineComponent, ref, watch } from "vue";
 import { useGlobalsStore } from "../stores/globals";
+import type { Ref } from "vue";
+import { TableData } from "../models/data_models";
+
 export default defineComponent({
   setup() {
     const globals = useGlobalsStore();
-    const tableResults: any = ref([]);
+    const tableResults: Ref<TableData[]> = ref([]);
 
     watch(
       () => globals,
@@ -82,7 +85,7 @@ export default defineComponent({
         }
       }
 
-      tableResults.value.sort((p1: any, p2: any) =>
+      tableResults.value.sort((p1: TableData, p2: TableData) =>
         p1.points < p2.points
           ? 1
           : p1.points > p2.points

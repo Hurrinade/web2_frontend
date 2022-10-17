@@ -65,6 +65,9 @@ import { useAuth0 } from "@auth0/auth0-vue";
 import AddComment from "./AddComment.vue";
 import EditComment from "./EditComment.vue";
 
+import type { Ref } from "vue";
+import { Comment } from "../models/data_models";
+
 export default defineComponent({
   components: {
     AddComment,
@@ -72,28 +75,28 @@ export default defineComponent({
   },
   props: {
     resultid: {
-      type: String,
+      type: Number,
       default: null,
     },
   },
   setup() {
-    const globals = useGlobalsStore();
-    const comments: any = ref(globals.commentsData);
-    const addNewComment = ref(false);
-    const toogleEditComment = ref(false);
-    const editCommentId = ref("");
+    const globals: any = useGlobalsStore();
+    const comments: Ref<Comment[]> = ref(globals.commentsData);
+    const addNewComment: Ref<boolean> = ref(false);
+    const toogleEditComment: Ref<boolean> = ref(false);
+    const editCommentId: Ref<number | null> = ref(null);
     const { getAccessTokenSilently, isAuthenticated } = useAuth0();
 
     watch(
       () => globals.commentsData,
       (val) => {
         comments.value = val;
-        editCommentId.value = "";
+        editCommentId.value = null;
       },
       { deep: true }
     );
 
-    const deleteComment = async (comment: any) => {
+    const deleteComment = async (comment: Comment) => {
       if (isAuthenticated) {
         const accessToken = await getAccessTokenSilently();
         const url =
@@ -104,7 +107,7 @@ export default defineComponent({
         const resComments = await fetch(
           url +
             new URLSearchParams({
-              id: comment.commentId,
+              id: String(comment.commentId),
             }),
           {
             method: "DELETE",
@@ -127,7 +130,7 @@ export default defineComponent({
       }
     };
 
-    const editComment = (comment: any) => {
+    const editComment = (comment: Comment) => {
       toogleEditComment.value = true;
       editCommentId.value = comment.commentId;
     };
