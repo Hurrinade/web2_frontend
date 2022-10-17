@@ -66,6 +66,17 @@ export default defineComponent({
       isError: false,
     });
 
+    watch(
+      () => props.result,
+      (val) => {
+        selectedTeam1.value = val.firstTeamName;
+        selectedTeam2.value = val.secondTeamName;
+        teamOneGoals.value = val.firstTeamGoals;
+        teamTwoGoals.value = val.secondTeamGoals;
+      },
+      { deep: true }
+    );
+
     const submit = async () => {
       if (isAuthenticated.value) {
         let team1Id = null;
