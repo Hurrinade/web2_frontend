@@ -9,9 +9,12 @@
       <a v-if="isAuthenticated" style="margin-left: 35em"><LogoutPage /></a>
       <UserInfo v-if="isAuthenticated" style="" />
     </div>
-    <TableView v-if="tab === 'table'" />
-    <FixturesView v-if="tab === 'fixtures'" />
-    <ResultsView v-if="tab === 'results'" />
+    <Loading v-if="isLoading" />
+    <div v-if="!isLoading">
+      <TableView v-if="tab === 'table'" />
+      <FixturesView v-if="tab === 'fixtures'" />
+      <ResultsView v-if="tab === 'results'" />
+    </div>
   </div>
 </template>
 
@@ -21,10 +24,13 @@ import FixturesView from "./components/FixturesView.vue";
 import ResultsView from "./components/ResultsView.vue";
 import TableView from "./components/TableView.vue";
 import LoginPage from "./components/LoginPage.vue";
+import Loading from "./components/Loading,.vue";
 import LogoutPage from "./components/LogoutPage.vue";
 import UserInfo from "./components/UserInfo.vue";
 import { useGlobalsStore } from "./stores/globals";
 import { useAuth0 } from "@auth0/auth0-vue";
+
+import type { Ref } from "vue";
 
 export default defineComponent({
   name: "App",
@@ -35,11 +41,12 @@ export default defineComponent({
     TableView,
     LoginPage,
     LogoutPage,
+    Loading,
   },
 
   setup(props: any, ctx: any) {
     const tab = ref("table");
-
+    const isLoading: Ref<boolean> = ref(true);
     const globals = useGlobalsStore();
     const { getAccessTokenSilently, error, user, isAuthenticated } = useAuth0();
 
@@ -48,11 +55,13 @@ export default defineComponent({
     };
 
     const fetchData = async () => {
+      isLoading.value = true;
       const res = await fetch(`${globals.localUrl}/data`);
       const data = await res.json();
       globals.tableData = data.table;
       globals.fixturesData = data.fixtures;
       globals.resultsData = data.results;
+      isLoading.value = false;
     };
 
     watch(
@@ -118,6 +127,7 @@ export default defineComponent({
       tab,
       changeTab,
       isAuthenticated,
+      isLoading,
     };
   },
 });
